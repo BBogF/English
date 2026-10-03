@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#141414">
+    <meta name="description" content="Пройдите адаптивную диагностику английского с аудированием и разговорной практикой, сохраните результаты и узнайте, что учить дальше.">
+    <title>Wordwise — подготовка к английскому экзамену</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="features.css">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="dictionary-data.js"></script>
+    <script src="dictionary-expansion.js"></script>
+    <script src="data-layer.js"></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body data-theme="dark">
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Wordwise — главная">
+        <span class="brand-mark" aria-hidden="true">w.</span>
+        <span>wordwise<span class="brand-period">.</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Основная навигация">
+        <button class="nav-link is-active" data-view-target="home">Сегодня</button>
+        <button class="nav-link" data-view-target="practice">Практика</button>
+        <button class="nav-link" data-view-target="tests">Тесты</button>
+        <button class="nav-link" data-view-target="errors">Ошибки</button>
+        <button class="nav-link" data-view-target="dictionary">Словарь</button>
+        <button class="nav-link" data-view-target="scales">Экзамен</button>
+        <button class="nav-link" data-view-target="account">Профиль</button>
+        <button class="nav-link" data-view-target="settings">Настройки</button>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Включить тёмную тему" title="Сменить тему"><span id="theme-icon" aria-hidden="true">☾</span></button>
+      <button class="top-cta" data-start-diagnostic>10 минут <span aria-hidden="true">↗</span></button>
+    </header>
+
+    <main>
+      <section class="view is-visible" id="view-home" aria-labelledby="hero-title">
+        <div class="hero-grid page-wrap" data-reveal>
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> ТВОЯ КАРТА АНГЛИЙСКОГО</p>
+            <h1 id="hero-title">Подготовься к<br><em>экзамену.</em></h1>
+            <p class="hero-description">Тренируй форматы Duolingo English Test, разбирай причины ошибок и двигайся к баллу, который нужен для учёбы или визы.</p>
+            <div class="hero-actions">
+              <button class="button button-primary" data-start-diagnostic>Начать бесплатно · 10 минут <span aria-hidden="true">→</span></button>
+              <button class="text-button" data-view-target="practice">Посмотреть 13 типов заданий <span aria-hidden="true">↗</span></button>
+            </div>
+            <div class="hero-proof"><span class="helper-character" aria-hidden="true">w.</span><p><strong>Без регистрации для первого теста.</strong><br>Оценки примерные, не официальный результат DET.</p></div>
+          </div>
+
+          <aside class="hero-art" aria-label="Пример карты уровней">
+            <div class="art-photo" role="img" aria-label="Открытая книга и записи для изучения языка"></div>
+            <div class="art-stamp"><span>YOUR</span><strong>next<br>word</strong><span>STARTS HERE</span></div>
+            <div class="level-note">
+              <span class="note-kicker">УРОВЕНЬ НЕ ОДНА ЦИФРА</span>
+              <div class="note-levels"><b>A1</b><i></i><b>A2</b><i></i><b>B1</b><i></i><b>B2</b><i></i><b>C1</b><i></i><b>C2</b></div>
+              <span class="note-caption">Смотри, что уже получается</span>
+            </div>
+          </aside>
+        </div>
+
+          <section class="today-dashboard page-wrap" id="today-dashboard" hidden data-reveal>
+            <div class="today-heading"><div><p class="eyebrow">ТВОЯ ПОДГОТОВКА</p><h2>Сегодня — <em id="today-date"></em></h2></div><button class="text-button" id="edit-goal">Изменить цель</button></div>
+            <div class="today-grid"><article class="today-main-task"><p class="eyebrow">ГЛАВНАЯ ЗАДАЧА</p><h3 id="today-task-title">Пройди быструю диагностику</h3><p id="today-task-copy">Определим отправную точку и предложим план до экзамена.</p><button class="button button-primary" id="today-task-action">Начать бесплатно <span aria-hidden="true">→</span></button></article><article class="today-goal-progress"><div class="today-progress-heading"><span>План на сегодня</span><strong id="today-minutes">0 / 30 мин</strong></div><div class="today-progress-track"><span id="today-progress-fill"></span></div><p id="exam-countdown">Сохрани дату экзамена, чтобы увидеть обратный отсчёт.</p><div class="target-score-progress"><div><span id="target-score-caption">Прогресс к цели DET</span><strong id="target-score-current">Пройди диагностику</strong></div><div class="today-progress-track"><span id="target-score-progress-fill"></span></div></div><div class="streak-line"><span class="streak-glyph" aria-hidden="true">✳</span><span><strong id="study-streak">0 дней</strong> работы над слабым местом</span><button class="text-button" id="freeze-streak">Пауза на день</button></div><div class="reminder-row"><label for="reminder-time">Напомнить только, если план не выполнен</label><div><input id="reminder-time" type="time" value="18:00"><button class="reminder-button" id="toggle-reminder" aria-pressed="false">Включить</button></div><span id="reminder-status">Работает, пока сайт открыт. Без серии за простой вход.</span></div></article></div>
+          </section>
+
+        <section class="overview-band page-wrap" aria-label="Что покажет диагностика" data-reveal>
+          <div class="section-intro">
+            <p class="eyebrow">НЕ ПРОСТО ТЕСТ</p>
+            <h2>Понятный результат.<br><em>Следующий шаг.</em></h2>
+          </div>
+          <article class="overview-item">
+            <span class="item-number">01</span>
+            <h3>Уровень по CEFR</h3>
+            <p>Ориентир от A1 до C2 по ответам на задания разной сложности.</p>
+          </article>
+          <article class="overview-item">
+            <span class="item-number">02</span>
+            <h3>Разбор ошибок</h3>
+            <p>Верные ответы, объяснение и слова, которые стоит повторить.</p>
+          </article>
+          <article class="overview-item">
+            <span class="item-number">03</span>
+            <h3>Словарь по уровням</h3>
+            <p>Слова в контексте: значение, пример и фильтр по CEFR.</p>
+          </article>
+        </section>
+
+        <section class="skills-section page-wrap" data-reveal>
+          <div class="section-heading-row"><div><p class="eyebrow">АНГЛИЙСКИЙ — ЭТО НЕ ТОЛЬКО СЛОВА</p><h2>Четыре навыка.<br><em>Один понятный маршрут.</em></h2></div><p>CEFR описывает, как ты пользуешься языком в жизни. Поэтому хорошая подготовка развивает и понимание, и умение выразить свою мысль.</p></div>
+          <div class="skill-grid">
+            <article class="skill-tile skill-speaking"><span class="skill-symbol" aria-hidden="true">↗</span><span class="skill-index">01 / SPEAKING</span><h3>Говорить</h3><p>Подбирать слова на ходу, задавать вопросы и уверенно поддерживать разговор.</p></article>
+            <article class="skill-tile skill-listening"><span class="skill-symbol" aria-hidden="true">)))</span><span class="skill-index">02 / LISTENING</span><h3>Слышать</h3><p>Улавливать главную мысль, детали и интонацию в живой речи.</p></article>
+            <article class="skill-tile skill-reading"><span class="skill-symbol" aria-hidden="true">≡</span><span class="skill-index">03 / READING</span><h3>Понимать</h3><p>Читать тексты, замечать связи между идеями и выводить смысл из контекста.</p></article>
+            <article class="skill-tile skill-writing"><span class="skill-symbol" aria-hidden="true">✎</span><span class="skill-index">04 / GRAMMAR + WRITING</span><h3>Строить мысль</h3><p>Точно соединять слова и грамматику, чтобы звучать естественно.</p></article>
+          </div>
+        </section>
+
+        <section class="level-guide page-wrap" data-reveal>
+          <div class="level-guide-title"><p class="eyebrow">ОТ ПЕРВОЙ ФРАЗЫ ДО СВОБОДНОГО ВЛАДЕНИЯ</p><h2>Что значит <em>каждый уровень?</em></h2></div>
+          <div class="level-guide-list">
+            <article><span>A1</span><p><strong>Начальный.</strong> Понимаешь знакомые слова и отвечаешь простыми фразами.</p></article>
+            <article><span>A2</span><p><strong>Базовый.</strong> Справляешься с повседневными темами и короткими сообщениями.</p></article>
+            <article><span>B1</span><p><strong>Средний.</strong> Объясняешь опыт и планы, понимаешь основное в знакомых темах.</p></article>
+            <article><span>B2</span><p><strong>Выше среднего.</strong> Поддерживаешь разговор и понимаешь аргументы в сложных текстах.</p></article>
+            <article><span>C1</span><p><strong>Продвинутый.</strong> Гибко используешь язык в учебе, работе и общении.</p></article>
+            <article><span>C2</span><p><strong>Свободное владение.</strong> Понимаешь тонкие оттенки и выражаешься очень точно.</p></article>
+          </div>
+        </section>
+
+        <section class="home-practice page-wrap" data-reveal><div><p class="eyebrow">ПРАКТИКА НА КАЖДЫЙ ДЕНЬ</p><h2>Не знаешь, с чего начать?<br><em>Выбери один навык.</em></h2></div><button class="button button-primary" data-view-target="practice">Перейти к урокам <span aria-hidden="true">→</span></button></section>
+
+        <section class="start-strip page-wrap">
+          <div><span class="strip-mark">10′</span><p><strong>Первый тест без регистрации.</strong> Полная адаптивная репетиция займёт около часа.</p></div>
+          <button class="button button-dark" data-start-diagnostic>Быстрая диагностика <span aria-hidden="true">→</span></button>
+        </section>
+        <p class="disclaimer page-wrap">Это адаптивная учебная диагностика с автоматической оценкой ответов, а не официальный CEFR-сертификат. Полный уровень также зависит от аудирования, говорения, чтения и письма.</p>
+      </section>
+
+      <section class="view page-wrap" id="view-quiz" aria-labelledby="quiz-heading" hidden>
+        <div class="quiz-topline">
+          <button class="back-link" data-view-target="home">← Обзор</button>
+          <span class="quiz-tag">АДАПТИВНАЯ ДИАГНОСТИКА · ДО 45 МИНУТ</span>
+          <span class="timer" id="timer" aria-live="off">30:00</span>
+        </div>
+        <div class="quiz-progress"><span id="progress-fill"></span></div>
+        <div class="quiz-layout">
+          <aside class="quiz-aside">
+            <p class="eyebrow">ВОПРОС <span id="question-count">01 / 30</span></p>
+            <h2 id="quiz-heading">Сосредоточься<br><em>на смысле.</em></h2>
+            <p class="quiz-aside-copy">Сложность заданий меняется по ходу теста. Отвечай в своём темпе: результат и разбор появятся только в конце.</p>
+          </aside>
+          <div class="question-panel">
+            <div class="question-meta"><span class="question-type-label">ВОПРОС</span><span id="question-type">В КОНТЕКСТЕ</span></div>
+            <img id="quiz-image" class="quiz-image" alt="" hidden>
+            <h3 id="question-prompt"></h3>
+            <p id="question-context" class="question-context" hidden></p>
+            <div class="quiz-audio" id="quiz-audio" hidden><button class="audio-button" id="quiz-play-audio" aria-label="Прослушать задание">▶</button><span>Прослушай внимательно. Текст можно открыть после ответа.</span><button class="transcript-toggle" id="quiz-transcript-toggle">Показать текст</button></div>
+            <p id="quiz-transcript" class="quiz-transcript" hidden></p>
+            <div class="quiz-speaking" id="quiz-speaking" hidden><p id="speaking-instruction"></p><textarea id="speaking-response" maxlength="900" placeholder="Ответ появится здесь после записи"></textarea><div class="speaking-tools"><button class="speech-button" id="quiz-mic-button">◉ Распознать ответ</button><button class="speech-button" id="quiz-record-audio" type="button">● Записать голос</button><span id="speech-status">Ответь голосом или введи текст по-английски.</span></div></div>
+            <div id="answer-options" class="answer-options" role="group" aria-label="Варианты ответа"></div>
+            <div class="quiz-feedback" id="quiz-feedback" hidden></div>
+            <div class="quiz-controls">
+              <button class="text-button" id="previous-question">← Назад</button>
+              <span class="answered-count" id="answered-count">0 ответов</span>
+              <button class="button button-primary" id="next-question">Дальше <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view page-wrap" id="view-result" aria-labelledby="result-title" hidden>
+        <div class="result-heading-row">
+          <div><p class="eyebrow">ТВОЯ КАРТА АНГЛИЙСКОГО</p><h1 id="result-title">Результат <em>диагностики</em></h1></div>
+          <button class="button button-outline" data-start-mock>Новый пробный тест ↺</button>
+        </div>
+        <div class="save-result-prompt" id="save-result-prompt" hidden><div><strong>Сохранить результат?</strong><p>Создай аккаунт, чтобы привязать диагностику к своему профилю.</p></div><button class="button button-primary" data-view-target="account">Сохранить результат →</button></div>
+        <div class="result-overview" id="result-overview">
+          <div class="result-level-block"><span class="result-label">ТВОЙ ОРИЕНТИР</span><div class="result-level" id="result-level">A1</div><p id="result-summary"></p></div>
+          <div class="result-score-block"><span class="result-label">ТОЧНОСТЬ ОТВЕТОВ</span><strong id="result-score">0%</strong><div class="score-track"><span id="score-fill"></span></div><p id="result-correct-count">0 из 30 правильных</p></div>
+          <div class="result-chart" id="result-chart" aria-label="Результат по каждому уровню"></div>
+        </div>
+          <section class="det-score-report"><div><p class="eyebrow">УЧЕБНЫЙ ОРИЕНТИР · НЕ СЕРТИФИКАТ</p><h2>Примерный диапазон DET</h2><p>Диапазон рассчитан по нашим заданиям и не калиброван на официальных результатах Duolingo English Test.</p><strong id="det-score-range">—</strong></div><div class="det-subscore-grid" id="det-subscore-grid"></div></section>
+        <section class="result-equivalencies"><div><p class="eyebrow">НЕОФИЦИАЛЬНОЕ СОПОСТАВЛЕНИЕ</p><h2>Как это читать для других экзаменов</h2></div><div id="result-equivalency-list"></div><p>Это приблизительные диапазоны для ориентира, не конвертация и не гарантия приёма. TOEFL показан по прежней шкале 0–120; у ETS действует обновлённая отчётность.</p></section>
+          <section class="response-rubric-section" id="response-rubric-section" hidden><p class="eyebrow">КРИТЕРИИ ОТВЕТА</p><h2>За что можно было получить баллы</h2><div class="response-rubric-list" id="response-rubric-list"></div><p class="pronunciation-note">Произношение не оценивается автоматически: браузер распознаёт слова, но не проверяет фонетику.</p></section>
+        <div class="result-review-bar" id="result-review-bar"><div><span class="eyebrow">ЗАКРЕПИ СРАЗУ</span><p>Пройди только те вопросы, где ответ был неверным.</p></div><button class="button button-primary" id="retry-mistakes">Проработать ошибки <span aria-hidden="true">→</span></button></div>
+        <div class="result-lower-grid">
+          <section class="result-section"><div class="result-section-head"><div><p class="eyebrow">РАЗБОР</p><h2>Что повторить</h2></div><span id="mistake-total" class="count-badge">0</span></div><div id="mistake-list" class="mistake-list"></div></section>
+          <aside class="next-step-card"><span class="next-icon" aria-hidden="true">✳</span><p class="eyebrow">ТВОЙ СЛЕДУЮЩИЙ ШАГ</p><h2 id="next-step-title">Собери базу уверенно</h2><p id="next-step-copy">Повтори слова, которые встретились в контексте, и возвращайся к ним позже.</p><button class="button button-dark" data-view-target="dictionary">Открыть словарь <span aria-hidden="true">→</span></button></aside>
+        </div>
+        <p class="disclaimer">Результат — ориентир по ответам в этой адаптивной диагностике, а не официальный сертификат. Автоматическая проверка устной речи анализирует распознанный текст, но не оценивает произношение.</p>
+      </section>
+
+      <section class="view page-wrap" id="view-practice" aria-labelledby="practice-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">ПРАКТИКА В ТВОЁМ ТЕМПЕ · БЕЗ ЛИМИТА</p><h1 id="practice-title">Тренируй <em>формат теста</em></h1><p>Выбери один из 13 тренировочных форматов DET, затем нужное время. Базовая практика бесплатна.</p></div></div>
+        <section class="det-practice-section"><div class="det-section-heading"><div><p class="eyebrow">13 ТИПОВ ЗАДАНИЙ</p><h2>Отдельная тренировка <em>каждого навыка</em></h2></div><p>Учебные задания по мотивам опубликованных форматов. Реальный тест может обновляться: это не официальный интерфейс и не копия заданий DET.</p></div><div class="det-task-grid" id="det-task-grid"></div></section>
+        <div class="mock-test-strip"><div><p class="eyebrow">ПРОВЕРЬ СЕБЯ ЦЕЛИКОМ</p><h2>Полная адаптивная репетиция · около 60 минут</h2><p>Все четыре компонента, таймер и разбор с ориентировочным диапазоном.</p></div><button class="button button-dark" data-start-mock>Начать пробный тест <span aria-hidden="true">→</span></button></div>
+        <section class="duration-planner" id="duration-planner" aria-labelledby="duration-title">
+          <div class="duration-planner-copy"><p class="eyebrow">ПЛАН ЗАНЯТИЯ</p><h2 id="duration-title">Сколько у тебя времени?</h2><p>Можно завершить урок раньше или продолжить после таймера.</p></div>
+          <div class="duration-options" id="lesson-duration-options" role="group" aria-label="Длительность занятия"></div>
+          <p class="duration-plan-summary" id="lesson-plan-summary"></p>
+        </section>
+        <div class="practice-recommendation" id="practice-recommendation" hidden></div>
+        <div class="lesson-grid" id="lesson-grid"></div>
+        <section class="lesson-room" id="lesson-room" hidden aria-live="polite">
+          <div class="lesson-room-top"><button class="back-link" id="lesson-back">← Все уроки</button><span id="lesson-duration" class="quiz-tag">20 МИНУТ · 9 УПРАЖНЕНИЙ</span><span class="lesson-clock" id="lesson-time-left">20:00</span></div>
+          <div class="lesson-progress"><span id="lesson-progress-fill"></span></div>
+          <div class="lesson-content">
+            <p class="eyebrow" id="lesson-skill-label"></p><h2 id="lesson-prompt"></h2><p class="lesson-instruction" id="lesson-instruction"></p>
+            <div class="lesson-audio" id="lesson-audio" hidden><button class="audio-button" id="play-audio" aria-label="Прослушать текст">▶</button><span>Прослушай фразу, затем выбери смысл.</span><button class="transcript-toggle" id="transcript-toggle">Показать текст</button></div>
+            <div class="lesson-sentence" id="lesson-sentence" hidden></div>
+            <div class="lesson-answer-area" id="lesson-answer-area"></div>
+            <div class="lesson-feedback" id="lesson-feedback" hidden></div>
+            <div class="lesson-actions"><button class="button button-primary" id="lesson-submit">Проверить <span aria-hidden="true">→</span></button><button class="button button-dark" id="lesson-finish" hidden>Завершить урок <span aria-hidden="true">✓</span></button></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view page-wrap" id="view-tests" aria-labelledby="tests-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">ТВОЯ ИСТОРИЯ ПРОВЕРОК</p><h1 id="tests-title">Тесты и <em>результаты</em></h1><p>Начни десятиминутную диагностику или полный пробный тест, а затем возвращайся к сохранённым попыткам.</p></div><strong class="tests-count" id="tests-count">0 попыток</strong></div>
+        <div class="test-launch-grid"><article class="test-launch-card"><span class="eyebrow">10 МИНУТ · БЕЗ АККАУНТА</span><h2>Быстрая диагностика</h2><p>Оцени стартовый уровень и сохрани результат локально.</p><button class="button button-primary" data-start-diagnostic>Начать диагностику</button></article><article class="test-launch-card"><span class="eyebrow">ПОЛНАЯ РЕПЕТИЦИЯ</span><h2>Пробный тест DET</h2><p>Полный adaptive-тест с отчётом и подбаллами.</p><button class="button button-dark" data-start-mock>Начать пробный тест</button></article></div>
+        <section class="test-history-section"><div class="account-section-heading"><div><p class="eyebrow">СОХРАНЁННЫЕ ПОПЫТКИ</p><h2>История тестов</h2></div></div><div class="test-history-list" id="test-history-list"></div></section>
+      </section>
+
+      <section class="view page-wrap" id="view-errors" aria-labelledby="errors-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">ПОВТОР ВОВРЕМЯ, А НЕ В ПОСЛЕДНЮЮ НОЧЬ</p><h1 id="errors-title">Дневник <em>ошибок</em></h1><p>Ошибки сгруппированы по типу. Повторяй их через интервалы, чтобы слабое место действительно стало сильнее.</p></div></div>
+        <div class="diary-summary" id="diary-summary"></div>
+        <div class="diary-filters" id="diary-filters" aria-label="Фильтр ошибок"></div>
+        <div class="diary-list" id="diary-list"></div>
+      </section>
+
+      <section class="view account-view" id="view-account" aria-label="Личный кабинет" hidden>
+        <div class="account-shell">
+          <aside class="account-sidebar">
+            <a class="account-sidebar-brand" href="#home" data-view-target="home">wordwise<span>.</span></a>
+            <nav class="account-side-nav" aria-label="Навигация кабинета">
+              <button data-view-target="home"><span aria-hidden="true">⌂</span>Сегодня</button>
+              <button data-view-target="practice"><span aria-hidden="true">⌁</span>Практика</button>
+              <button data-view-target="tests"><span aria-hidden="true">▣</span>Тесты</button>
+              <button data-view-target="errors"><span aria-hidden="true">⟳</span>Ошибки</button>
+              <button class="is-active" data-view-target="account"><span aria-hidden="true">♙</span>Кабинет</button>
+              <button data-view-target="settings"><span aria-hidden="true">⚙</span>Настройки</button>
+            </nav>
+            <div class="account-sidebar-foot"><span class="sidebar-status-dot"></span><span id="account-sidebar-status">Локальный профиль</span><button class="account-theme-toggle" id="account-theme-toggle" type="button" aria-label="Переключить тему" title="Переключить тему">☀</button></div>
+          </aside>
+          <div class="account-content">
+            <section class="account-auth" id="account-auth" aria-label="Вход и регистрация">
+              <article class="auth-panel auth-register-panel">
+                <p class="eyebrow">СОХРАНИ СВОЙ ПРОГРЕСС</p><h2>Создайте аккаунт</h2>
+                <p class="auth-result-highlight" id="auth-result-highlight">Сохраним результаты диагностики и план подготовки.</p>
+                <button class="auth-google-button" type="button" data-auth-google>◉ <span>Продолжить через Google</span></button>
+                <div class="auth-divider"><span>или по почте</span></div>
+                <form id="auth-register-form" class="auth-form" data-auth-mode="register" novalidate>
+                  <label>Имя<input id="auth-name" maxlength="32" autocomplete="name" placeholder="Как к тебе обращаться?"></label>
+                  <label>Почта<input id="register-email" type="email" required autocomplete="email" placeholder="name@company.com"><small class="form-field-error" id="register-email-error"></small></label>
+                  <label>Пароль<input id="register-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Минимум 8 символов"><small class="form-field-error" id="register-password-error"></small></label>
+                  <label class="auth-consent"><input id="auth-consent" type="checkbox" required><span>Согласен на хранение прогресса в аккаунте. Удалить данные можно в кабинете.</span></label>
+                  <button class="button button-primary" id="auth-register-submit" type="submit">Создать аккаунт</button>
+                  <p id="register-message" class="auth-message" role="status"></p>
+                </form>
+                <p class="auth-switch-prompt">Уже есть аккаунт? Войдите справа.</p>
+              </article>
+              <div class="auth-login-column">
+                <article class="auth-panel auth-login-panel">
+                  <p class="eyebrow">РАДЫ ВАС ВИДЕТЬ</p><h2>С возвращением</h2>
+                  <form id="auth-login-form" class="auth-form" data-auth-mode="login" novalidate>
+                    <label>Почта<input id="login-email" type="email" required autocomplete="email" placeholder="name@company.com"><small class="form-field-error" id="login-email-error"></small></label>
+                    <label class="auth-password-label"><span>Пароль</span><button class="auth-forgot-button" id="auth-forgot" type="button">Забыли пароль?</button><input id="login-password" type="password" required minlength="8" autocomplete="current-password" placeholder="Ваш пароль"><small class="form-field-error" id="login-password-error"></small></label>
+                    <button class="button button-primary" id="auth-login-submit" type="submit">Войти</button>
+                    <p id="login-message" class="auth-message" role="status"></p>
+                  </form>
+                  <form id="login-mfa-form" class="auth-form login-mfa-form" hidden>
+                    <label>Код из приложения-аутентификатора<input id="login-mfa-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000"></label>
+                    <button class="button button-primary" type="submit">Подтвердить вход</button>
+                    <button class="text-button" id="cancel-login-mfa" type="button">Отменить вход</button>
+                  </form>
+                  <form id="password-recovery-form" class="auth-form password-recovery-form" hidden>
+                    <label>Новый пароль<input id="recovery-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Не менее 8 символов"></label>
+                    <label>Повтори пароль<input id="recovery-password-confirm" type="password" required minlength="8" autocomplete="new-password" placeholder="Повтори новый пароль"></label>
+                    <button class="button button-primary" type="submit">Сохранить пароль</button>
+                    <button class="text-button" id="cancel-password-recovery" type="button">Вернуться ко входу</button>
+                  </form>
+                  <button class="auth-google-button" type="button" data-auth-google>◉ <span>Войти через Google</span></button>
+                </article>
+                <article class="auth-panel auth-guest-panel"><h3>Пока без аккаунта</h3><p>Пройдите диагностику бесплатно. Регистрация понадобится, только чтобы синхронизировать прогресс.</p><button class="button button-outline" data-start-diagnostic>Начать диагностику ↗</button></article>
+              </div>
+              <p class="auth-config-note" id="auth-config-note">Синхронизация появится после подключения Supabase. Пока прогресс сохраняется в этом браузере.</p>
+            </section>
+            <div class="account-authenticated" id="account-authenticated" hidden><span class="signed-in-label" id="signed-in-label"></span><button class="text-button" id="auth-logout">Выйти</button></div>
+            <div class="account-welcome"><div class="profile-monogram" id="profile-monogram">W</div><div class="account-welcome-copy"><strong id="account-welcome-name">Мой кабинет</strong><span id="account-welcome-meta">Моя цель подготовки</span></div><label class="profile-name-label" for="profile-name">Имя</label><input id="profile-name" maxlength="32" placeholder="Ваше имя" autocomplete="given-name"><span class="profile-save-status" id="profile-save-status">Сохраняется автоматически</span><span class="account-streak-chip">♨ <strong id="account-streak">0 дней</strong></span></div>
+            <section class="account-goal-overview" id="account-goal-overview"></section>
+            <div class="account-dashboard-grid">
+              <section class="account-exam-checklist"><div class="account-section-heading"><div><p class="eyebrow">БЛИЖЕ К ЭКЗАМЕНУ</p><h2>Подготовка к экзамену</h2></div><button class="text-button" data-view-target="scales">Все условия</button></div><div class="account-checklist"><label><input type="checkbox" data-exam-check="id"><span>Паспорт или допустимый документ</span></label><label><input type="checkbox" data-exam-check="room"><span>Тихая комната без посторонних</span></label><label><input type="checkbox" data-exam-check="alone"><span>Во время теста в помещении только я</span></label><label><input type="checkbox" data-exam-check="desk"><span>Стол чистый, телефон убран</span></label></div></section>
+              <section class="account-recent-activity"><div class="account-section-heading"><div><p class="eyebrow">ЧТО ПРОИСХОДИЛО</p><h2>Последняя активность</h2></div></div><div class="account-activity-list" id="account-activity-list"></div></section>
+            </div>
+            <section class="account-error-practice" id="account-error-practice" aria-labelledby="account-error-title"></section>
+            <div class="account-stats" id="account-stats"></div>
+            <div class="account-main-grid"><section class="history-section"><div class="account-section-heading"><div><p class="eyebrow">ИСТОРИЯ</p><h2>Попытки и прогресс</h2></div><button class="text-button" id="clear-history">Очистить историю</button></div><div id="history-list" class="history-list"></div></section><aside class="focus-panel" id="focus-panel"></aside></div>
+            <section class="account-settings" id="account-settings">
+              <div class="account-section-heading"><div><p class="eyebrow">АККАУНТ И БЕЗОПАСНОСТЬ</p><h2>Настройки</h2></div></div>
+              <p class="security-backend-note" id="security-backend-note" role="status"></p>
+              <div class="security-settings-grid">
+                <form id="change-email-form" class="security-card">
+                  <h3>Почта</h3><p id="account-email-current">Войдите, чтобы изменить почту аккаунта.</p>
+                  <label>Новый адрес<input id="account-new-email" type="email" required autocomplete="email" placeholder="new@email.com"></label>
+                  <button class="button button-outline" type="submit" data-security-requires-account>Изменить почту</button>
+                  <p class="security-message" id="change-email-message" role="status"></p>
+                </form>
+                <form id="change-password-form" class="security-card">
+                  <h3>Пароль</h3><p>После смены пароля используй его при следующем входе.</p>
+                  <label class="local-current-password" id="local-current-password-label">Текущий пароль<input id="account-current-password" type="password" autocomplete="current-password" placeholder="Для локального аккаунта"></label>
+                  <label>Новый пароль<input id="account-new-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Не менее 8 символов"></label>
+                  <label>Повтори пароль<input id="account-confirm-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Повтори новый пароль"></label>
+                  <button class="button button-outline" type="submit" data-security-requires-account>Сменить пароль</button>
+                  <p class="security-message" id="change-password-message" role="status"></p>
+                </form>
+                <section class="security-card">
+                  <h3>Google</h3><p id="google-link-status">Войдите, чтобы связать Google с аккаунтом.</p>
+                  <button class="button button-outline" id="link-google" type="button" data-security-requires-account>Связать Google</button>
+                  <p class="security-message" id="google-link-message" role="status"></p>
+                </section>
+                <section class="security-card mfa-card">
+                  <h3>Двухэтапная проверка</h3><p id="mfa-status">Для входа можно включить код из приложения-аутентификатора.</p>
+                  <button class="button button-outline" id="enable-mfa" type="button" data-security-requires-account>Настроить 2FA</button>
+                  <button class="button button-outline" id="disable-mfa" type="button" data-security-requires-account hidden>Отключить 2FA</button>
+                  <div class="mfa-setup-panel" id="mfa-setup-panel" hidden>
+                    <p>Добавь этот аккаунт в приложение-аутентификатор и введи текущий шестизначный код.</p>
+                    <img id="mfa-qr-code" alt="QR-код для подключения приложения-аутентификатора" hidden>
+                    <label class="mfa-secret-label">Ключ настройки<input id="mfa-secret" readonly></label>
+                    <form id="mfa-verify-form"><label>Код подтверждения<input id="mfa-setup-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000"></label><button class="button button-primary" type="submit">Подтвердить 2FA</button></form>
+                  </div>
+                  <p class="security-message" id="mfa-message" role="status"></p>
+                </section>
+              </div>
+              <label class="ai-review-consent"><input id="ai-review-optin" type="checkbox"><span><strong>Разрешить AI-разбор письма и речи.</strong> Только после включения текст моих ответов будет отправляться через защищённую функцию Supabase для обратной связи. По умолчанию выключено; произношение всё равно не оценивается.</span></label>
+              <div class="account-data-actions"><div><h3>Данные аккаунта</h3><p>Экспортируй историю или удали профиль и связанные голосовые записи.</p></div><button class="button button-outline" id="download-my-data" type="button">Скачать мои данные</button><button class="button button-danger" id="delete-account-data" type="button">Удалить аккаунт и данные</button><p class="security-message" id="account-data-message" role="status"></p></div>
+              <div class="account-note"><strong>О приватности.</strong> Пароль обрабатывает Supabase Auth и сайт его не сохраняет. Результаты хранятся в таблице с политиками доступа: пользователь может читать и менять только собственные данные. Без настроек Supabase работает только локальный гостевой профиль.</div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="view page-wrap settings-view" id="view-settings" aria-labelledby="settings-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">НАСТРОЙ ПОДГОТОВКУ ПОД СЕБЯ</p><h1 id="settings-title">Настройки <em>профиля</em></h1><p>План, напоминания, серия, тема и защита аккаунта.</p></div></div>
+        <section class="settings-preferences"><div class="account-section-heading"><div><p class="eyebrow">ПЛАН НА КАЖДЫЙ ДЕНЬ</p><h2>Режим подготовки</h2></div></div><div class="settings-preference-grid"><label>Время на занятия<select id="settings-daily-minutes"><option value="15">15 минут</option><option value="20">20 минут</option><option value="30">30 минут</option><option value="45">45 минут</option><option value="60">60 минут</option></select></label><label class="settings-reminder-check"><input id="settings-reminder-enabled" type="checkbox"><span>Напоминать, если дневной план не выполнен</span></label><label>Время напоминания<input id="settings-reminder-time" type="time" value="18:00"></label><button class="button button-outline" id="settings-freeze-streak" type="button">Заморозить серию на день</button><label class="settings-theme-check"><input id="settings-dark-theme" type="checkbox"><span>Тёмная тема</span></label></div><p class="settings-preference-status" id="settings-preference-status" role="status"></p></section>
+        <div class="settings-page-content account-content" id="settings-page-content"><section class="voice-recordings-panel"><div class="account-section-heading"><div><p class="eyebrow">УСТНЫЕ ОТВЕТЫ</p><h2>Голосовые записи</h2></div></div><div id="voice-recordings-list"></div></section></div>
+      </section>
+
+      <section class="view page-wrap" id="view-dictionary" aria-labelledby="dictionary-title" hidden>
+        <div class="page-heading dictionary-heading"><div><p class="eyebrow">СЛОВА В ЖИВОМ КОНТЕКСТЕ</p><h1 id="dictionary-title">Словарь <em>по уровням</em></h1><p>Ищи слово, смотри значение и замечай, как оно звучит в предложении.</p></div><div class="dictionary-stat"><strong id="dictionary-count">0</strong><span>слов в подборке</span></div></div>
+        <div class="dictionary-source-status" id="dictionary-source-status" role="status" aria-live="polite">Локальная подборка готова · дополнительные слова загрузятся при открытии словаря.</div>
+        <p class="dictionary-attribution">Дополнительно загружается LexiCore-5000 v1.0.0: 5 000 слов A1–C1, лицензия <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · <a href="https://github.com/X-Trivle/LexiCore" target="_blank" rel="noreferrer">источник и методология</a>. Исходник не содержит русских переводов и примеров; при подключении интернета перевод запрашивается у MyMemory и помечается как машинный. Часть речи источника может быть неточной. C2 остаётся нашей локальной подборкой.</p>
+        <div class="dictionary-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input id="dictionary-search" type="search" placeholder="Найти слово или перевод" autocomplete="off"><kbd>/</kbd></label><div class="filter-row" id="level-filters" aria-label="Фильтр по уровню"></div></div>
+        <div class="dictionary-refine"><div class="pos-filter-row" id="pos-filters" aria-label="Фильтр по части речи"></div><div class="dictionary-view-switch" role="group" aria-label="Вид словаря"><button class="dictionary-view-button is-active" data-dictionary-view="list" aria-pressed="true">Список</button><button class="dictionary-view-button" data-dictionary-view="cards" aria-pressed="false">Карточки</button></div></div>
+        <nav class="alphabet-index" id="alphabet-index" aria-label="Словарь по алфавиту"></nav>
+        <p class="dictionary-range" id="dictionary-range"></p>
+        <div class="dictionary-grid is-list" id="dictionary-grid"></div>
+        <nav class="word-pagination" id="word-pagination" aria-label="Страницы словаря"></nav>
+        <p class="dictionary-note">Подборка охватывает все буквы A–Z, но не содержит каждое слово английского языка. Уровень и формы зависят от значения и контекста.</p>
+      </section>
+
+      <section class="view page-wrap" id="view-scales" aria-labelledby="scales-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">СООТНЕСЕНИЕ ЭКЗАМЕНОВ</p><h1 id="scales-title">CEFR — <em>общая карта</em></h1><p>Ориентировочные диапазоны помогают сориентироваться, но не переводят один экзаменационный балл в другой.</p></div></div>
+        <div class="table-wrap"><table class="scales-table"><thead><tr><th>CEFR</th><th>IELTS Academic</th><th>TOEFL iBT*</th><th>Duolingo English Test</th><th>CELPIP / CLB**</th></tr></thead><tbody id="scale-rows"></tbody></table></div>
+        <div class="scale-footnotes"><p><b>* TOEFL iBT:</b> диапазоны 0–120 показаны только для старых результатов. С 21 января 2026 ETS использует шкалу 1–6; точное соответствие смотри в актуальном score report и на сайте ETS.</p><p><b>** CELPIP:</b> результаты CELPIP напрямую соотносятся с Canadian Language Benchmarks (CLB). Универсальной официальной конвертации CELPIP/CLB в CEFR нет, поэтому значения здесь показаны как грубый ориентир, не как эквивалент.</p><p>У разных экзаменов разные задания, навыки и правила округления. Сверяй диапазоны на сайтах организаторов перед подачей результатов. В таблице использованы ориентиры, не сертифицированная конвертация.</p></div>
+        <div class="source-links"><a href="https://www.ielts.org/for-organisations/ielts-scoring-in-detail" target="_blank" rel="noreferrer">IELTS scoring ↗</a><a href="https://www.ets.org/toefl/test-takers/ibt/scores/understanding-scores.html" target="_blank" rel="noreferrer">TOEFL scores ↗</a><a href="https://englishtest.duolingo.com/scores" target="_blank" rel="noreferrer">Duolingo scores ↗</a><a href="https://www.celpip.ca/score-users/score-descriptors/" target="_blank" rel="noreferrer">CELPIP score descriptors ↗</a></div>
+        <section class="exam-check-section"><div class="det-section-heading"><div><p class="eyebrow">ТЕХНИЧЕСКАЯ РЕПЕТИЦИЯ</p><h2>Подготовь <em>рабочее место</em></h2></div><p>Проверь устройство заранее. Никакая локальная проверка не гарантирует соответствие официальным требованиям DET.</p></div><div class="exam-check-grid"><label><input type="checkbox" data-exam-check="id"> Паспорт или допустимый документ под рукой</label><label><input type="checkbox" data-exam-check="room"> Тихая комната без посторонних</label><label><input type="checkbox" data-exam-check="alone"> Во время теста в помещении только я</label><label><input type="checkbox" data-exam-check="desk"> Стол чистый, телефон убран</label></div><div class="device-check"><div><button class="button button-primary" id="check-devices">Проверить камеру и микрофон</button><p id="device-status" role="status">Браузер спросит разрешение на камеру и микрофон.</p><div class="mic-meter"><span id="mic-meter-fill"></span></div><button class="text-button" id="stop-device-check" hidden>Остановить проверку</button></div><video id="camera-preview" autoplay muted playsinline aria-label="Предпросмотр камеры"></video></div><div class="exam-walkthrough"><p class="eyebrow">МИНИ-РЕПЕТИЦИЯ · 4 ШАГА</p><div id="walkthrough-steps"><span>Подготовь документ и рабочее место</span><span>Проверь камеру и микрофон</span><span>Прочитай инструкции на экране</span><span>Начни, когда готов сосредоточиться</span></div><button class="text-button" id="start-walkthrough">Показать шаги по очереди ↗</button></div></section>
+        <section class="university-section"><div class="det-section-heading"><div><p class="eyebrow">ПОРОГИ ВУЗОВ</p><h2>Найди <em>требование программы</em></h2></div><p>Требования меняются по программе и году набора. Мы не подставляем непроверенные баллы: поиск ведёт к официальным страницам, где нужно сверить общий балл и подбаллы.</p></div><form id="university-search-form" class="university-search"><label for="university-name">Вуз или программа</label><input id="university-name" required placeholder="Например, University of Toronto"><button class="button button-dark" type="submit">Искать требования <span aria-hidden="true">↗</span></button></form><p class="university-result" id="university-result" role="status">Введи название, чтобы открыть поиск по официальным сайтам вуза.</p></section>
+      </section>
+    </main>
+
+    <footer class="site-footer"><a class="brand footer-brand" href="#home"><span class="brand-mark" aria-hidden="true">w.</span><span>wordwise<span class="brand-period">.</span></span></a><span>Учись замечать смысл.</span><span>© <span id="current-year"></span> Wordwise · Учебная диагностика</span></footer>
+    <dialog class="word-dialog" id="word-dialog" aria-labelledby="word-dialog-title">
+      <div class="word-dialog-top"><span class="eyebrow">СЛОВО В КОНТЕКСТЕ</span><button class="dialog-close" id="word-dialog-close" aria-label="Закрыть">×</button></div>
+      <div class="word-dialog-heading"><div><h2 id="word-dialog-title"></h2><p id="word-dialog-meta"></p></div><span class="word-level" id="word-dialog-level"></span></div>
+      <p class="word-dialog-meaning" id="word-dialog-meaning"></p>
+      <div class="word-use-note"><span aria-hidden="true">?</span><p id="word-dialog-usage"></p></div>
+      <div class="word-forms" id="word-dialog-forms" hidden></div>
+      <p class="eyebrow word-time-heading">ПРИМЕРЫ ВО ВРЕМЕНИ</p>
+      <div class="word-time-examples" id="word-dialog-tenses"></div>
+    </dialog>
+    <dialog class="word-practice-dialog" id="word-practice-dialog" aria-labelledby="word-practice-title">
+      <div class="word-practice-header"><div><p class="eyebrow">МИКРОПРАКТИКА · БЕЗ ЛИМИТА</p><h2 id="word-practice-title">Практика слова</h2></div><button class="dialog-close" id="word-practice-close" aria-label="Закрыть">×</button></div>
+      <div class="word-practice-progress"><span id="word-practice-step-label">Шаг 1 из 3</span><div><span id="word-practice-progress-fill"></span></div></div>
+      <p class="word-practice-prompt" id="word-practice-prompt"></p>
+      <div class="word-practice-options" id="word-practice-options"></div>
+      <textarea id="word-practice-response" class="word-practice-response" maxlength="400" placeholder="Напиши своё предложение на английском" hidden></textarea>
+      <div class="word-practice-feedback" id="word-practice-feedback" hidden></div>
+      <div class="word-practice-actions"><button class="button button-primary" id="word-practice-check">Проверить <span aria-hidden="true">→</span></button><button class="button button-dark" id="word-practice-next" hidden>Дальше <span aria-hidden="true">→</span></button></div>
+    </dialog>
+    <dialog class="goal-dialog" id="goal-dialog" aria-labelledby="goal-dialog-title">
+      <form id="goal-form" class="goal-form">
+        <div class="goal-dialog-header"><p class="eyebrow">СТАРТ БЕЗ РЕГИСТРАЦИИ</p><button type="button" class="dialog-close" id="goal-dialog-close" aria-label="Закрыть">×</button></div>
+        <h2 id="goal-dialog-title">К чему готовимся?</h2><p>Эти ответы нужны только для персонального плана. Первый тест доступен без аккаунта.</p>
+        <label>Целевой балл DET<select id="goal-score" required><option value="90">90</option><option value="100">100</option><option value="105">105</option><option value="110" selected>110</option><option value="115">115</option><option value="120">120</option><option value="125">125</option><option value="130">130</option><option value="135">135</option><option value="140">140</option><option value="145">145</option><option value="150">150</option><option value="155">155</option><option value="160">160</option></select></label>
+        <label>Дата экзамена<input id="goal-date" type="date" required></label>
+        <label>Время на подготовку в день<select id="goal-daily-minutes"><option value="15">15 минут</option><option value="30" selected>30 минут</option><option value="60">60 минут</option></select></label>
+        <div class="goal-form-actions"><button class="button button-primary" type="submit">Сохранить и начать · 10 мин <span aria-hidden="true">→</span></button><button class="text-button" type="button" id="goal-skip">Пройти тест без плана</button></div>
+      </form>
+    </dialog>
+    <dialog class="goal-dialog delete-account-dialog" id="delete-account-dialog" aria-labelledby="delete-account-title">
+      <div class="goal-dialog-header"><p class="eyebrow">УДАЛЕНИЕ БЕЗ ВОЗВРАТА</p><button type="button" class="dialog-close" id="delete-account-close" aria-label="Закрыть">×</button></div>
+      <h2 id="delete-account-title">Удалить аккаунт и данные?</h2><p>Будут удалены профиль, тесты, ошибки, настройки и голосовые записи. Это действие нельзя отменить.</p>
+      <div class="delete-account-actions"><button class="button button-danger" id="confirm-delete-account" type="button">Удалить всё</button><button class="button button-outline" id="cancel-delete-account" type="button">Оставить аккаунт</button></div>
+    </dialog>
+    <dialog class="goal-dialog" id="forgot-password-dialog" aria-labelledby="forgot-password-title">
+      <form id="forgot-password-form" class="goal-form" novalidate>
+        <div class="goal-dialog-header"><p class="eyebrow">ВОССТАНОВЛЕНИЕ ДОСТУПА</p><button type="button" class="dialog-close" id="forgot-password-close" aria-label="Закрыть">×</button></div>
+        <h2 id="forgot-password-title">Забыли пароль?</h2><p>Укажи почту аккаунта. Если восстановление доступно, отправим ссылку.</p>
+        <label>Почта<input id="forgot-password-email" type="email" required autocomplete="email" placeholder="name@company.com"><small class="form-field-error" id="forgot-password-error"></small></label>
+        <p id="forgot-password-message" class="security-message" role="status"></p>
+        <div class="goal-form-actions"><button class="button button-primary" type="submit">Отправить ссылку</button><button class="text-button" type="button" id="forgot-password-cancel">Отмена</button></div>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
